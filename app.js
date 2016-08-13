@@ -1,5 +1,8 @@
 var express = require('express');
 var app = express();
+var bodyParser = require('body-parser');
+var formidable = require('formidable');
+var jqupload = require('jquery-file-upload-middleware');
 
 //view engine
 var handlebars = require('express3-handlebars').create({
@@ -16,6 +19,8 @@ app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
 
 var fortune = require('./lib/fortune.js');
+
+app.use(bodyParser.urlencoded({ extended: false }));
 
 app.set('port', process.env.PORT || 3000);
 app.use(express.static(__dirname + '/public'));
@@ -102,6 +107,56 @@ app.get('/data/nursery-rhyme', function(req, res){
         noun: 'heck',
     });
 });
+
+app.get('/thank-you', function(req, res){
+    res.render('thank-you');
+});
+app.get('/newsletter', function(req, res){
+    // we will learn about CSRF later...for now, we just
+    // provide a dummy value
+    res.render('newsletter', { csrf: 'CSRF token goes here' });
+});
+app.post('/process', function(req, res){
+    if(req.xhr || req.accepts('json,html')==='json'){
+        // if there were an error, we would send { error: 'error description' }
+        res.send({ success: true });
+    } else {
+        // if there were an error, we would redirect to an error page
+        res.redirect(303, '/thank-you');
+    }
+});
+
+app.get('/contest/vacation-photo', function(req, res){
+    var now = new Date();
+    res.render('contest/vacation-photo', { year: now.getFullYear(), month: now.getMonth() });
+});
+app.get('/contest/jquery-file', function(req, res){
+    var now = new Date();
+    res.render('contest/jquery-file', { year: now.getFullYear(), month: now.getMonth() });
+});
+app.post('/contest/vacation-photo/:year/:month', function(req, res){
+    var form = new formidable.IncomingForm();
+    form.parse(req, function(err, fields, files){
+        if(err) return res.redirect(303, '/error');
+        console.log('received fields:');
+        console.log(fields);
+        console.log('received files:');
+        console.log(files);
+        res.redirect(303, '/thank-you');
+    });
+});
+
+app.use('/upload', function(req, res, next){
+    var now = new Date();
+    jqupload.fileHandler({
+        uploadDir: function () {
+            return __dirname + '/public/uploads/'+ now;
+        },
+        uploadUrl: function(){
+            return __dirname + '/uploads/'+ now;
+        }(req, res, next)
+    })
+})
 
 //404 page
 app.use(function(req, res){
