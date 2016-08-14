@@ -4,6 +4,7 @@ var bodyParser = require('body-parser');
 var formidable = require('formidable');
 var jqupload = require('jquery-file-upload-middleware');
 var credentials = require('./credentials');
+var emailService = require('./lib/email.js')(credentials);
 
 //view engine
 var handlebars = require('express3-handlebars').create({
@@ -83,7 +84,6 @@ app.use(function(req, res, next){
 
 app.get('/', function(req, res){
     req.session.userName = 'acc';
-    var colorSchema = req.session.colorSchema || 'dark';
     res.cookie('monster', '111');
     res.render('home', {title: fortune.getFortune()});
 });
@@ -178,6 +178,10 @@ app.use('/upload', function(req, res, next){
             return __dirname + '/uploads/'+ now;
         }(req, res, next)
     })
+});
+
+app.get('/sendemail', function(req, res){
+    emailService.send('326283679@qq.com','hello', 'this is node email');
 })
 
 // for now, we're mocking NewsletterSignup:
@@ -229,8 +233,6 @@ app.use(function(req, res){
     res.status(404);
     res.render('404');
 });
-
-
 
 //500 page
 app.use(function(err,req, res, next){
