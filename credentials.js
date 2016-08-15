@@ -3,5 +3,13 @@ module.exports = {
     email: {
         user: 'troyking@126.com',
         password: 'ltylty0349'
+    },
+    mongo: {
+        development:{
+            connectionString: 'dev'
+        },
+        production:{
+            connectionString: 'product'
+        }
     }
 }
