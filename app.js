@@ -430,6 +430,21 @@ app.post('/notify-me-when-in-season', function(req, res){
         }
     );
 });
+
+var autoViews = {};
+var fs = require('fs');
+app.use(function(req, res, next){
+    var path = req.path.toLowerCase();
+    if (autoViews[path]){
+        return res.render(autoViews[path]);
+    }
+    if (fs.existsSync(__dirname + '/views' + path + '.handlebars')){
+        autoViews[path] = path.replace(/^\//, '');
+        return res.render(autoViews[path]);
+    }
+    next();
+})
+
 //404 page
 app.use(function(req, res){
     res.status(404);
