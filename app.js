@@ -5,11 +5,11 @@ var formidable = require('formidable');
 var jqupload = require('jquery-file-upload-middleware');
 var credentials = require('./credentials');
 var emailService = require('./lib/email.js')(credentials);
-var mongoose = require('mongoose');
 
-var http = require('http'),
-    Vacation = require('./models/vacation.js'),
-    VacationInSeasonListener = require('./models/vacationInSeasonListener.js');
+
+var http = require('http');
+    //Vacation = require('./models/vacation.js'),
+    //VacationInSeasonListener = require('./models/vacationInSeasonListener.js');
 
 //domain
 app.use(function(req, res, next){
@@ -57,6 +57,9 @@ var handlebars = require('express3-handlebars').create({
             if(!this._sections) this._sections = {};
             this._sections[name] = options.fn(this);
             return null;
+        },
+        static: function(name){
+            return require('./lib/static.js').map(name);
         }
     }
 });
@@ -64,8 +67,8 @@ app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
 
 var fortune = require('./lib/fortune.js');
-var MongoSessionStore = require('session-mongoose')(require('connect'));
-var sessionStore = new MongoSessionStore({ url: credentials.mongo[app.get('env')].connectionString });
+//var MongoSessionStore = require('session-mongoose')(require('connect'));
+//var sessionStore = new MongoSessionStore({ url: credentials.mongo[app.get('env')].connectionString });
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(require('cookie-parser')(credentials.cookieSercret));
@@ -73,7 +76,7 @@ app.use(require('express-session')({
     resave: false,
     saveUninitialized: true,
     secret:credentials.cookieSercret,
-    store: sessionStore
+    //store: sessionStore
 }));
 
 // flash message middleware
@@ -93,75 +96,29 @@ app.use(function(req, res, next){
     next();
 });
 
-var opts = {
-    server:{
-        socketOptions: {keepAlive: 1}
-    }
-};
+//var mongoose = require('mongoose');
+//var opts = {
+//    server:{
+//        socketOptions: {keepAlive: 1}
+//    }
+//};
 
 switch(app.get('env')){
     case 'development':
         app.use(require('morgan')('dev'));
-        mongoose.connect(credentials.mongo.development.connectionString, opts);
+        //mongoose.connect(credentials.mongo.development.connectionString, opts);
+        //mongoose.connect('mongodb://127.0.0.1:63384/test');
         break;
     case 'production':
         app.use(require('express-logger')({
             path: __dirname + '/log/requests.log'
         }));
-        mongoose.connect(credentials.mongo.production.connectionString, opts);
+        //mongoose.connect(credentials.mongo.production.connectionString, opts);
+        //mongoose.connect('mongodb://localhost/test');
         break;
     default :
         throw new Error('Unknown environment :' + app.get('env'));
 }
-
-Vacation.find(function(err, vacations){
-    if(vacations.length) return;
-
-    new Vacation({
-        name: 'Hood River Day Trip',
-        slug: 'hood-river-day-trip',
-        category: 'Day Trip',
-        sku: 'HR199',
-        description: 'Spend a day sailing on the Columbia and ' +
-        'enjoying craft beers in Hood River!',
-        priceInCents: 9995,
-        tags: ['day trip', 'hood river', 'sailing', 'windsurfing', 'breweries'],
-        inSeason: true,
-        maximumGuests: 16,
-        available: true,
-        packagesSold: 0,
-    }).save();
-
-    new Vacation({
-        name: 'Oregon Coast Getaway',
-        slug: 'oregon-coast-getaway',
-        category: 'Weekend Getaway',
-        sku: 'OC39',
-        description: 'Enjoy the ocean air and quaint coastal towns!',
-        priceInCents: 269995,
-        tags: ['weekend getaway', 'oregon coast', 'beachcombing'],
-        inSeason: false,
-        maximumGuests: 8,
-        available: true,
-        packagesSold: 0,
-    }).save();
-
-    new Vacation({
-        name: 'Rock Climbing in Bend',
-        slug: 'rock-climbing-in-bend',
-        category: 'Adventure',
-        sku: 'B99',
-        description: 'Experience the thrill of rock climbing in the high desert.',
-        priceInCents: 289995,
-        tags: ['weekend getaway', 'bend', 'high desert', 'rock climbing', 'hiking', 'skiing'],
-        inSeason: true,
-        requiresWaiver: true,
-        maximumGuests: 4,
-        available: false,
-        packagesSold: 0,
-        notes: 'The tour guide is currently recovering from a skiing accident.',
-    }).save();
-});
 
 // mocked weather data
 function getWeatherData(){
@@ -192,12 +149,12 @@ function getWeatherData(){
     };
 }
 
-app.use(function(req, res, next){
-    var cluster = require('cluster');
-    if (cluster.isWorker){
-        console.log('Worker %d received request', cluster.worker.id);
-    }
-});
+//app.use(function(req, res, next){
+//    var cluster = require('cluster');
+//    if (cluster.isWorker){
+//        console.log('Worker %d received request', cluster.worker.id);
+//    }
+//});
 
 app.use(function(req, res, next){
     if(!res.locals.partials) res.locals.partials = {};
@@ -360,13 +317,13 @@ app.use(function(err, req, res, next){
     app.status(500).render('500');
 })
 
-app.get('/vacation/:vacation', function(req, res, next){
-    Vacation.findOne({ slug: req.params.vacation }, function(err, vacation){
-        if(err) return next(err);
-        if(!vacation) return next();
-        res.render('vacation', { vacation: vacation });
-    });
-});
+//app.get('/vacation/:vacation', function(req, res, next){
+//    Vacation.findOne({ slug: req.params.vacation }, function(err, vacation){
+//        if(err) return next(err);
+//        if(!vacation) return next();
+//        res.render('vacation', { vacation: vacation });
+//    });
+//});
 
 function convertFromUSD(value, currency){
     switch(currency){

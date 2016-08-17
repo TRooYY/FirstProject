@@ -8,8 +8,11 @@
     <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.css"/>
     {{{_sections.head}}}
     <script src="/vendor/js/jquery-2.1.1.min.js"></script>
+    <script src="{{static '/js/app.min.js'}}"></script>
+    <link rel="stylesheet" href="{{static /css/app.min.css}}">
 </head>
 <body>
+<header><img src="{{static './img/logo.jpg'}}" alt="Logo image" ></header>
 {{{body}}}
     {{#if showTests}}
         <div id="mocha"></div>
